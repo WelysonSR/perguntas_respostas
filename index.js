@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const connection =require("./database/database");
+const Pergunta = require("./database/Pergunta");
 
 //Verificando conexão com BD
 
@@ -20,8 +21,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 //Rotas
-app.get("/",(req,res)=>{    
-    res.render("index");
+app.get("/",(req,res)=>{ 
+    Pergunta.findAll({raw: true}).then(perguntas => {
+        res.render("index",{
+            perguntas:perguntas
+        });
+    });    
 });
 
 app.get("/perguntar",(req,res)=>{    
@@ -31,7 +36,12 @@ app.get("/perguntar",(req,res)=>{
 app.post("/salvarpergunta",(req,res)=>{ 
     let titulo = req.body.titulo;
     let descricao = req.body.descricao;   
-    res.send("Formulario recebido! " + titulo + " " + descricao);
+    Pergunta.create({
+        titulo:titulo,
+        descricao:descricao
+    }).then(()=>{
+        res.redirect("/");
+    });
 });
 
 //Executando serve
