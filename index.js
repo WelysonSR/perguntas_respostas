@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const connection =require("./database/database");
 const Pergunta = require("./database/Pergunta");
+const Resposta = require("./database/Resposta");
 
 //Verificando conexão com BD
 
@@ -20,7 +21,7 @@ app.use(express.static('public'));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-//Rotas
+//Rotas Gat
 app.get("/",(req,res)=>{ 
     Pergunta.findAll({raw: true, order:[
         ['id','DESC']
@@ -35,6 +36,29 @@ app.get("/perguntar",(req,res)=>{
     res.render("perguntar");
 });
 
+app.get("/pergunta/:id",(req,res)=>{    
+    let id = req.params.id;
+    Pergunta.findOne({
+        where: {id:id}
+    }).then(pergunta =>{
+        if(pergunta != undefined){
+
+            Resposta.findAll({
+                where: {perguntaId: pergunta.id}
+            }).then(respostas => {
+                res.render("pergunta",{
+                    pergunta: pergunta,
+                    respostas: respostas
+                });
+            });
+
+        }else{
+            res.redirect("/");
+        }
+    });
+});
+
+//Rotas POST
 app.post("/salvarpergunta",(req,res)=>{ 
     let titulo = req.body.titulo;
     let descricao = req.body.descricao;   
@@ -46,18 +70,14 @@ app.post("/salvarpergunta",(req,res)=>{
     });
 });
 
-app.get("/pergunta/:id",(req,res)=>{    
-    let id = req.params.id;
-    Pergunta.findOne({
-        where: {id:id}
-    }).then(pergunta =>{
-        if(pergunta != undefined){
-            res.render("pergunta",{
-                pergunta: pergunta
-            });
-        }else{
-            res.redirect("/");
-        }
+app.post("/responder",(req,res)=>{ 
+    let corpo = req.body.corpo;
+    let perguntaId = req.body.perguntaId;   
+    Resposta.create({
+        corpo:corpo,
+        perguntaId:perguntaId
+    }).then(()=>{
+        res.redirect("/pergunta/"+perguntaId);
     });
 });
 

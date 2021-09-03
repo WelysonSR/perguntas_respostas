@@ -10,8 +10,27 @@
         <div class="card-body">
             <p><%= pergunta.descricao %></p>
         </div>
-    </div>
-    
+    </div>    
+
+    <form method="POST" action="/responder">
+        <hr>
+        <label>Responder</label>
+        <textarea name="corpo" placeholder="Digite sua resposta" class="form-control"></textarea>
+        <input type="hidden" name="perguntaId" value="<%= pergunta.id %>">
+        <button type="submit" class="btn btn-primary">Responder</button>
+    </form>
+
+    <h3>Respostas</h3><hr>
+
+    <% respostas.forEach(resposta =>{ %>        
+        <div class="card">
+            <div class="card-body">
+                <p><%= resposta.corpo %></p>
+            </div>
+        </div>
+        <br>
+    <% }) %>
+
 </div>
 
 <%- include ('partials/footer.ejs')%>
